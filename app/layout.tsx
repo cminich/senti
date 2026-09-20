@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "senti — conversational sentiment analysis",
+  title: "senti — see how your words land",
   description:
-    "Paste a dialogue and see per-turn, per-speaker and overall sentiment scored in your browser.",
+    "Paste a conversation and see how each line is likely to land, where teasing tips into a put-down, and how to say the same thing without the sting.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -7,48 +7,47 @@ export type Sample = {
 
 export const SAMPLES: Sample[] = [
   {
-    id: "support",
-    label: "Support Escalation",
-    hint: "Tense, degrading",
-    dialogue: `Customer: I have been waiting three days for a response on ticket 44120 and nobody bothered to follow up.
-Agent: I am sorry about the delay. Let me pull up the ticket and see what happened.
-Customer: This is the fourth time I have explained the problem. The nightly export fails every single run and it is breaking our billing.
-Agent: I understand that is frustrating. I can see the escalation was never routed to the data team.
-Customer: So it just sat there? That is unacceptable. We pay for premium support and the service has been terrible.
-Agent: You are right to be upset, and I am escalating this to engineering right now at the highest priority.
-Customer: I have heard that promise before and nothing changed. Honestly I regret renewing, the whole experience has been awful.
-Agent: I hear you. I will personally own this until it is resolved and send an update within two hours.
-Customer: Two hours. If I do not hear back I am filing a formal complaint with our account executive.
-Agent: Understood. You will have a written fix plan today. I am sorry we let this get so bad.`,
+    id: "pileon",
+    label: "Group Chat Pile-On",
+    hint: "Sarcasm dressed up as compliments",
+    dialogue: `Maya: did everyone see Jordan's presentation today
+Tyler: oh it was unforgettable
+Maya: truly a bold choice to read straight off the slides for nine minutes
+Tyler: no no it was great. really engaging. i learned so much
+Jordan: i know it wasn't good, i had one night to put it together
+Maya: nobody said it was bad Jordan
+Tyler: we said it was historically bad
+Maya: anyway some of us are getting food after, we'll sort out the list later
+Jordan: am i on that list
+Tyler: we'll let you know`,
   },
   {
-    id: "standup",
-    label: "Collaborative Standup",
-    hint: "Upbeat, energised",
-    dialogue: `Priya: Morning everyone. Great news to share, the caching rewrite landed last night and latency dropped forty percent.
-Marcus: That is fantastic. I saw the dashboard this morning and the p95 curve looks beautiful.
-Priya: Thanks. Huge credit to Dana for catching the invalidation bug before it ever shipped.
-Dana: Happy to help. The new test harness made it easy to reproduce, which was a nice surprise.
-Marcus: I am excited about the onboarding flow too. Three of the five screens are done and they feel great.
-Dana: Agreed, the designs are lovely. I will pick up the remaining two today if nobody objects.
-Priya: Perfect. Any blockers at all before we wrap?
-Marcus: None from me, everything is running smoothly for once.
-Dana: Same here. I love how clean the new component API turned out.
-Priya: Wonderful. Excellent momentum team, let us keep it going.`,
+    id: "repair",
+    label: "Making It Right",
+    hint: "What repair actually sounds like",
+    dialogue: `Sam: hey. i've been thinking about what i said at lunch and it was out of line
+Devon: yeah it kind of stung honestly
+Sam: i know. i was annoyed about something else and i took it out on you, which wasn't fair
+Devon: i appreciate you saying that, i wasn't sure you even noticed
+Sam: i noticed. i've felt bad about it all afternoon
+Devon: for what it's worth i wasn't ignoring your message this morning, my phone died
+Sam: that makes sense. i jumped to a conclusion there too
+Devon: we're good. thanks for bringing it up instead of letting it sit
+Sam: always. tell me next time if i do it again`,
   },
   {
-    id: "contract",
-    label: "Contract Negotiation",
-    hint: "Measured, mixed",
-    dialogue: `Vendor: Thanks for making time. I would like to walk the redlines section by section.
-Client: Sounds good. We are mostly aligned, though the liability cap is still an open question.
-Vendor: Understood. We cap at twelve months of fees, which is standard for a deal of this size.
-Client: Our legal team pushed back on that. They would prefer eighteen months given the data we are handing over.
-Vendor: That is a fair concern. I can take eighteen months back to my team if we hold payment terms at net thirty.
-Client: Net thirty is tight but workable. The termination clause is the part I dislike.
-Vendor: Which piece specifically?
-Client: The ninety day notice window. Sixty would give us more flexibility if priorities shift.
-Vendor: Sixty works on our side. Let me confirm the change with finance.
-Client: Appreciate it. If we settle those two items I think we are close to signing.`,
+    id: "teasing",
+    label: "Just Joking?",
+    hint: "Banter that tips over mid-conversation",
+    dialogue: `Priya: ok who let Alex pick the playlist again
+Alex: my playlist is objectively elite and you are all wrong
+Priya: it's four hours of the same song with different intros
+Alex: that is called a cohesive artistic vision
+Priya: it's called having no personality
+Alex: ok
+Priya: wait i'm kidding obviously
+Alex: no you're good, it's fine
+Priya: you went quiet though
+Alex: i said it's fine`,
   },
 ];
