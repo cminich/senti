@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
-import { generateText, Output } from "ai";
+import { generateText, NoObjectGeneratedError, Output } from "ai";
 import { z } from "zod";
 
+import { RETRY, describeFailure } from "@/lib/failure";
 import { GATE_COOKIE, gateState } from "@/lib/gate";
 import {
   ROUGH_FLAGS,
@@ -118,7 +119,10 @@ export async function POST(request: Request) {
 
   if (gate === "misconfigured") {
     return Response.json(
-      { error: "This deployment has no class code set. Add SENTI_PASSCODE." },
+      {
+        error: RETRY,
+        fix: "This deployment has no class code set. Add SENTI_PASSCODE in the project's environment variables and redeploy.",
+      },
       { status: 503 },
     );
   }
@@ -133,8 +137,11 @@ export async function POST(request: Request) {
   if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
     return Response.json(
       {
-        error:
-          "No AI Gateway credentials found. Add AI_GATEWAY_API_KEY to .env.local and restart the dev server.",
+        error: RETRY,
+        fix:
+          process.env.NODE_ENV === "production"
+            ? "This deployment has no AI Gateway credentials. Add AI_GATEWAY_API_KEY in the project's environment variables and redeploy."
+            : "No AI Gateway credentials found. Add AI_GATEWAY_API_KEY to .env.local and restart the dev server.",
       },
       { status: 503 },
     );
@@ -174,9 +181,9 @@ export async function POST(request: Request) {
     return Response.json(output satisfies Analysis);
   } catch (error) {
     console.error("kindness read failed", error);
-    return Response.json(
-      { error: "The read did not come back. Try again in a moment." },
-      { status: 502 },
-    );
+    const { status, ...body } = describeFailure(error, {
+      garbled: NoObjectGeneratedError.isInstance(error),
+    });
+    return Response.json(body, { status });
   }
 }

@@ -14,6 +14,7 @@ import {
   Trash2,
   UsersRound,
   WandSparkles,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -539,6 +540,8 @@ export default function Dashboard() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Present only when the deployment itself needs attention. */
+  const [fix, setFix] = useState<string | null>(null);
 
   const tones = useMemo(() => {
     const map = new Map<string, string>();
@@ -564,6 +567,7 @@ export default function Dashboard() {
 
     setPending(true);
     setError(null);
+    setFix(null);
 
     try {
       const response = await fetch("/api/analyze", {
@@ -575,6 +579,7 @@ export default function Dashboard() {
 
       if (!response.ok) {
         setError(data.error ?? "That did not work. Try again.");
+        setFix(typeof data.fix === "string" ? data.fix : null);
         return;
       }
 
@@ -590,6 +595,7 @@ export default function Dashboard() {
     setText("");
     setAnalysis(null);
     setError(null);
+    setFix(null);
   }
 
   return (
@@ -695,6 +701,25 @@ export default function Dashboard() {
         {error && (
           <section className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
             {error}
+          </section>
+        )}
+
+        {fix && (
+          <section className="mt-3 rounded-2xl border border-amber-300 bg-amber-50 p-5 dark:border-amber-500/30 dark:bg-amber-500/10">
+            <div className="flex items-start gap-3">
+              <Wrench
+                className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400"
+                aria-hidden
+              />
+              <div className="text-sm">
+                <p className="font-semibold text-amber-900 dark:text-amber-200">
+                  For whoever set this up
+                </p>
+                <p className="mt-1 text-amber-800 dark:text-amber-200/80">
+                  {fix}
+                </p>
+              </div>
+            </div>
           </section>
         )}
 
