@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   AudioLines,
   Drama,
   HeartHandshake,
+  ImageUp,
   Lightbulb,
   LoaderCircle,
   Quote,
@@ -28,6 +29,7 @@ import {
   type Turn,
 } from "@/lib/kindness";
 import { SAMPLES } from "@/lib/samples";
+import { ACCEPT_ATTRIBUTE, imageProblem } from "@/lib/screenshot";
 
 const BAND_STYLES: Record<
   Band,
@@ -542,6 +544,8 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   /** Present only when the deployment itself needs attention. */
   const [fix, setFix] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const tones = useMemo(() => {
     const map = new Map<string, string>();
@@ -591,6 +595,46 @@ export default function Dashboard() {
     }
   }
 
+  /**
+   * Turns a screenshot into text and stops there. The transcript lands in the
+   * box so it can be checked, and corrected, before anyone is scored on it.
+   */
+  async function transcribe(file: File) {
+    if (reading || pending) return;
+
+    const problem = imageProblem(file);
+    if (problem) {
+      setError(problem);
+      setFix(null);
+      return;
+    }
+
+    setReading(true);
+    setError(null);
+    setFix(null);
+
+    try {
+      const body = new FormData();
+      body.append("image", file);
+
+      const response = await fetch("/api/transcribe", { method: "POST", body });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error ?? "That screenshot could not be read.");
+        setFix(typeof data.fix === "string" ? data.fix : null);
+        return;
+      }
+
+      setAnalysis(null);
+      setText(data.transcript as string);
+    } catch {
+      setError("Could not reach the reader. Check your connection.");
+    } finally {
+      setReading(false);
+    }
+  }
+
   function handleClear() {
     setText("");
     setAnalysis(null);
@@ -630,6 +674,39 @@ export default function Dashboard() {
             </span>
           </div>
 
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <input
+              ref={fileInput}
+              type="file"
+              accept={ACCEPT_ATTRIBUTE}
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                // Cleared so picking the same file twice still fires a change.
+                event.target.value = "";
+                if (file) transcribe(file);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInput.current?.click()}
+              disabled={reading || pending}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+            >
+              {reading ? (
+                <LoaderCircle className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <ImageUp className="size-4" aria-hidden />
+              )}
+              {reading ? "Reading the screenshot…" : "Upload a screenshot"}
+            </button>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {reading
+                ? "Copying out the messages. You can check them before reading."
+                : "Or paste one straight into the box. You can fix the text afterwards."}
+            </span>
+          </div>
+
           <textarea
             id="dialogue"
             value={text}
@@ -638,6 +715,17 @@ export default function Dashboard() {
               if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
                 event.preventDefault();
                 read(text);
+              }
+            }}
+            onPaste={(event) => {
+              // A screenshot on the clipboard is the common case on a Mac, and
+              // pasting it as an image beats saving it to disk first.
+              const file = [...event.clipboardData.files].find((candidate) =>
+                candidate.type.startsWith("image/"),
+              );
+              if (file) {
+                event.preventDefault();
+                transcribe(file);
               }
             }}
             rows={10}
@@ -656,7 +744,7 @@ export default function Dashboard() {
               <button
                 key={sample.id}
                 type="button"
-                disabled={pending}
+                disabled={pending || reading}
                 onClick={() => {
                   setText(sample.dialogue);
                   read(sample.dialogue);
@@ -673,7 +761,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => read(text)}
-              disabled={!text.trim() || pending}
+              disabled={!text.trim() || pending || reading}
               className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
             >
               {pending ? (
@@ -686,7 +774,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={handleClear}
-              disabled={pending || (!text && !analysis)}
+              disabled={pending || reading || (!text && !analysis)}
               className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:bg-slate-800"
             >
               <Trash2 className="size-4" aria-hidden />
@@ -811,7 +899,10 @@ export default function Dashboard() {
           </p>
           <p>
             senti saves nothing. To be read, a conversation is sent to a
-            language model, which is run by someone else.
+            language model, which is run by someone else. An uploaded
+            screenshot is sent the same way, and a screenshot usually carries
+            more than the words: names, photos and times. Crop it, or type the
+            messages out, if any of that should stay private.
           </p>
         </footer>
       </div>

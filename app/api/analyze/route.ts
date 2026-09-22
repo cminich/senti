@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { RETRY, describeFailure } from "@/lib/failure";
 import { GATE_COOKIE, gateState } from "@/lib/gate";
+import { modelId } from "@/lib/model";
 import {
   ROUGH_FLAGS,
   WARM_FLAGS,
@@ -13,8 +14,6 @@ import {
 export const maxDuration = 60;
 
 const MAX_CHARS = 8000;
-
-const DEFAULT_MODEL = "anthropic/claude-sonnet-5";
 
 const band = z.enum(["kind", "neutral", "edgy", "harsh"]);
 const flag = z.enum([...ROUGH_FLAGS, ...WARM_FLAGS]);
@@ -172,7 +171,7 @@ export async function POST(request: Request) {
 
   try {
     const { output } = await generateText({
-      model: process.env.SENTI_MODEL || DEFAULT_MODEL,
+      model: modelId(),
       system: SYSTEM,
       prompt: `Read this conversation:\n\n${transcript}`,
       output: Output.object({ schema }),
